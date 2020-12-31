@@ -1,9 +1,13 @@
 import os
 import sys
 import json
-from logbook import FileHandler
-log_handler = FileHandler("connect4_application.log", mode='a', encoding=None, level=0, format_string=None, delay=False,
-                          filter=None, bubble=False)
+from datetime import datetime
+from colorama import Fore
+import logbook
+
+logbook.set_datetime_format("local")
+log_handler = logbook.FileHandler("connect4_application.log", mode='a', encoding=None, level=0, format_string="%Y-%m-%d",
+                                  delay=False, filter=None, bubble=False)
 
 
 def main():
@@ -19,7 +23,7 @@ def main():
        [None, None, None, None, None, None, None]
     ]
     active_player_index = 0
-    players = ["Joe", "Computer"]
+    players = get_players()
     symbols = ["Red", "Ylw"]
 
     while not get_winner(board):
@@ -67,13 +71,20 @@ def show_leaders():
 
 def show_board(board):
 
-    print("|_1_|_2_|_3_|_4_|_5_|_6_|_7_|")
+    print("|1|2|3|4|5|6|7|")
     for row in board:
         print("|", end='')
         for cell in row:
-            symbol = cell if cell is not None else "___"
-            print(symbol, end='|')
+            symbol = cell #if cell is not None else "___"
+            if symbol == "Red":
+                print(Fore.RED + "0" + Fore.WHITE, end='|')
+            elif symbol == "Ylw":
+                print(Fore.YELLOW + "0" + Fore.WHITE, end='|')
+            else:
+                print(Fore.WHITE + "_", end='|')
         print()
+
+    print()
 
 
 def show_turn(player):
@@ -83,12 +94,13 @@ def show_turn(player):
 
 
 def get_players():
-    p1 = input("Player 1, what is your name? ")
-    p2 = input("Player 2, what is your name? ")
+    players = [input("Player 1, what is your name? "), input("Player 2, what is your name? ")]
 
-    log_handler.write(f"{p1} has logged in \n")
-    log_handler.write({f"{p2} has logged in \n"})
-    return p1, p2
+
+    log_handler.write(f"{str(players[0])} has logged in \n")
+    log_handler.write(f"{str(players[1])} has logged in \n")
+
+    return players
 
 
 def get_winner(board):
