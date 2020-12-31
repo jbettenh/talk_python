@@ -1,5 +1,0 @@
-[2020-12-31 10:56:05] App starting up...
-[2020-12-31 10:56:05] Loaded rolls: ['rock', 'paper', 'scissors', 'lizard', 'spock'] from rolls.json.
-[2020-12-31 10:56:11] Joe has logged in.
-[2020-12-31 10:56:11] New game starting between Joe and Computer.
-[2020-12-31 10:56:24] Score is Joe: 0 and Computer: 1.
