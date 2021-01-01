@@ -1,5 +1,4 @@
 import os
-# import sys
 import json
 from datetime import datetime
 from colorama import Fore
