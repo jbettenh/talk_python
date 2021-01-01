@@ -11,47 +11,62 @@ log_handler = logbook.FileHandler("connect4_application.log", mode='a', encoding
 
 
 def main():
-    log_handler.write("App starting up...\n")
 
-    show_leaders()
-    board = [
-       [None, None, None, None, None, None, None],
-       [None, None, None, None, None, None, None],
-       [None, None, None, None, None, None, None],
-       [None, None, None, None, None, None, None],
-       [None, None, None, None, None, None, None],
-       [None, None, None, None, None, None, None]
-    ]
-    active_player_index = 0
-    players = get_players()
-    symbols = ["Red", "Ylw"]
+    try:
+        log_handler.write("App starting up...\n")
 
-    while not get_winner(board):
-        player = players[active_player_index]
-        symbol = symbols[active_player_index]
+        show_leaders()
+        board = [
+           [None, None, None, None, None, None, None],
+           [None, None, None, None, None, None, None],
+           [None, None, None, None, None, None, None],
+           [None, None, None, None, None, None, None],
+           [None, None, None, None, None, None, None],
+           [None, None, None, None, None, None, None]
+        ]
+        active_player_index = 0
+        players = get_players()
+        symbols = ["Red", "Ylw"]
 
-        show_turn(player)
-        # Show the board (6 x 7)
+        while not get_winner(board):
+            player = players[active_player_index]
+            symbol = symbols[active_player_index]
+
+            show_turn(player)
+            # Show the board (6 x 7)
+            show_board(board)
+
+            if not get_column(board, symbol):
+                print("Please choose a valid column!")
+                continue
+
+            active_player_index = (active_player_index + 1) % len(players)
+
+        winner = players[(active_player_index + 1) % len(players)]
+        print()
+        print()
+        print(f" - - - GAME OVER! - - -")
         show_board(board)
+        print()
+        print(f"{winner} has Won!!")
+        print()
+        record_highscores(winner)
+        log_handler.write(f"{winner} has won! \n")
 
-        if not get_column(board, symbol):
-            print("Please choose a valid column!")
-            continue
+        log_handler.write("Exiting app \n")
 
-        active_player_index = (active_player_index + 1) % len(players)
+    except json.decoder.JSONDecodeError as je:
+        print(Fore.LIGHTRED_EX + "ERROR: The file highscores.json is invalid JSON")
+        print(f"Error: {je}" + Fore.WHITE)
+        log_handler.write(f"{je} \n")
 
-    winner = players[(active_player_index + 1) % len(players)]
-    print()
-    print()
-    print(f" - - - GAME OVER! - - -")
-    show_board(board)
-    print()
-    print(f"{winner} has Won!!")
-    print()
-    record_highscores(winner)
-    log_handler.write(f"{winner} has won! \n")
+    except KeyboardInterrupt:
+        print(Fore.LIGHTCYAN_EX + "Leaving game..." + Fore.WHITE)
+        log_handler.write(f"User force exited \n")
 
-    log_handler.write("Exiting app \n")
+    except Exception as e:
+        print(Fore.RED + "Error starting..." + Fore.WHITE)
+        log_handler.write(f"Unknown error on startup: {e} \n")
 
 
 def show_leaders():
@@ -75,7 +90,7 @@ def show_board(board):
     for row in board:
         print("|", end='')
         for cell in row:
-            symbol = cell #if cell is not None else "___"
+            symbol = cell
             if symbol == "Red":
                 print(Fore.RED + "0" + Fore.WHITE, end='|')
             elif symbol == "Ylw":
@@ -96,7 +111,6 @@ def show_turn(player):
 def get_players():
     players = [input("Player 1, what is your name? "), input("Player 2, what is your name? ")]
 
-
     log_handler.write(f"{str(players[0])} has logged in \n")
     log_handler.write(f"{str(players[1])} has logged in \n")
 
@@ -111,29 +125,6 @@ def get_winner(board):
         if symbol1 and all(symbol1 == cell for cell in cells):
             return True
     return False
-
-
-def get_column(board, symbol):
-    row = len(board) - 1
-    col = int(input("Choose which column: "))
-
-    col -= 1
-
-    if col < 0 or col >= len(board[0]):
-        return False
-
-    cell = board[row][col]
-
-    while cell is not None and row > 0:
-        row -= 1
-        cell = board[row][col]
-
-    if cell is not None and row == 0:
-        return False
-
-    board[row][col] = symbol
-
-    return True
 
 
 def get_winning_sequences(board):
@@ -258,6 +249,34 @@ def get_winning_sequences(board):
     sequences.append(diag22)
 
     return sequences
+
+
+def get_column(board, symbol):
+    try:
+        row = len(board) - 1
+        user_col = input("Choose which column: ")
+        col = int(user_col)
+
+        col -= 1
+
+        if col < 0 or col >= len(board[0]):
+            return False
+
+        cell = board[row][col]
+
+        while cell is not None and row > 0:
+            row -= 1
+            cell = board[row][col]
+
+        if cell is not None and row == 0:
+            return False
+
+        board[row][col] = symbol
+
+        return True
+    except ValueError as ve:
+        print(Fore.RED + f"Could not convert to integer: {ve}" + Fore.WHITE)
+        return False
 
 
 """ External File Handling """
